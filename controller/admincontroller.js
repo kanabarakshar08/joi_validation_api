@@ -1,9 +1,28 @@
 const admin = require('../model/admin');
 const path = require('path');
 const fs = require('fs');
+const Joi = require('joi');
+
+const registerValidationSchema = Joi.object().keys({
+    name: Joi.string().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+    confirm_pass: Joi.string().required(),
+    Mobile_Number: Joi.string().required(),
+    image: Joi.string(),
+    IsActive: Joi.boolean(),
+    Create_Date: Joi.string(),
+    Update_Date: Joi.string()
+});
 
 module.exports.admin_register = async(req, res)=>{
     try {
+        const result = registerValidationSchema.validate(req.body);
+        if (result.error){
+            return res.status(400).send({error: result.error.details[0].message});  
+        } 
+
+
         let checkEmail = await admin.findOne({ email: req.body.email });
         if (checkEmail) {
             return res.status(400).json({ mes: 'Email is Already Exist', status: 0 });
@@ -34,11 +53,7 @@ module.exports.admin_register = async(req, res)=>{
         }
     } catch (error) {
         console.log(error);
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ mes: error.message, status: 0 });
-        } else {
-            return res.status(500).json({ mes: 'Internal Server Error', status: 0 });
-        }
+        return res.status(400).json({ mes: 'data view is Not Found', status: 0 });
     }
 }
 module.exports.view_profile = async(req,res)=>{
@@ -135,11 +150,7 @@ module.exports.edit_admin = async(req,res)=>{
         }
     } catch (error) {
         console.log(error);
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ mes: error.message, status: 0 });
-        } else {
-            return res.status(500).json({ mes: 'Internal Server Error', status: 0 });
-        }
+        return res.status(400).json({ mes: 'data view is Not Found', status: 0 });
     }
 }
 
@@ -160,6 +171,7 @@ module.exports.delte_admin = async(req,res)=>{
                 }
             }
             else {
+
                 let deletPostData = await admin.findByIdAndDelete(req.params.id);
                 if (deletPostData) {
                     return res.status(200).json({ msg: 'Admin Data Delete', status: 1, rec: deletPostData });

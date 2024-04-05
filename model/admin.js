@@ -51,27 +51,6 @@ const ImageStorage = multer.diskStorage({
 RegisterSchema.statics.uploadImage = multer({ storage: ImageStorage }).single("image");
 RegisterSchema.statics.imagePath = imagePath;
 
-// Joi validation schema
-const registerValidationSchema = Joi.object({
-    name: Joi.string().required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().required(),
-    Mobile_Number: Joi.string().required(),
-    image: Joi.string(),
-    IsActive: Joi.boolean(),
-    Create_Date: Joi.string(),// Corrected default value
-    Update_Date: Joi.string()
-});
-
-// Joi validation middleware
-RegisterSchema.pre('save', async function (next) {
-    try {
-        await registerValidationSchema.validate(this);
-        next();
-    } catch (error) {
-        next(new Error(error.details[0].message));
-    }
-});
 
 
 
